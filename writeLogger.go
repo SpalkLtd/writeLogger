@@ -64,3 +64,7 @@ func (wl WriteLogger) Read(n int) []byte {
 func (wl WriteLogger) ReadBuffer() *bytes.Buffer {
 	return bytes.NewBuffer(wl.buffer)
 }
+
+func (wl WriteLogger) ReadString() string {
+	return string(wl.buffer)
+}
