@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-const defaultSize uint = 1024
+const defaultSize uint = 10240
 
 var newSize uint = defaultSize
 
