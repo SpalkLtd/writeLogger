@@ -9,9 +9,12 @@ Then write data as usual with `Write([]byte("myByteSlice"))`
 
 
 When something has gone wrong you can use this to retrieve the debug information that was printed just beforehand:
-`logger.Read(5)			//[]byte(string(Slice))
+
+```go
+logger.Read(5)			//[]byte(string(Slice))
 logger.ReadBuffer()		//bytes.NewBufferString("myByteSlice")
-logger.ReadString()		//"myByteSlice"`
+logger.ReadString()		//"myByteSlice"
+```
 
 
 
