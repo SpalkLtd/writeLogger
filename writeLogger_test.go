@@ -32,6 +32,22 @@ func TestCopyAndLog(t *testing.T) {
 			"got", end,
 		)
 	}
+
+	if writer.ReadString() != toCopy {
+		t.Error(
+			"For", toCopy, "string",
+			"expected", toCopy,
+			"got", end,
+		)
+	}
+
+	out = strings.Trim(string(writer.Read(999999999999999)), string(rune(0)))
+	if out != toCopy {
+		t.Error(
+			"For", toCopy, "bigN",
+			"got", out,
+		)
+	}
 }
 
 func TestRepeatedWrite(t *testing.T) {

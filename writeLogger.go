@@ -3,6 +3,7 @@ package writeLogger
 import (
 	"bytes"
 	"io"
+	"strings"
 )
 
 const defaultSize uint = 10240
@@ -58,6 +59,9 @@ func (wl *WriteLogger) Write(p []byte) (n int, err error) {
 }
 
 func (wl WriteLogger) Read(n int) []byte {
+	if n > len(wl.buffer) {
+		return wl.buffer
+	}
 	return wl.buffer[len(wl.buffer)-n:]
 }
 
@@ -66,5 +70,5 @@ func (wl WriteLogger) ReadBuffer() *bytes.Buffer {
 }
 
 func (wl WriteLogger) ReadString() string {
-	return string(wl.buffer)
+	return strings.Trim(string(wl.buffer), string(rune(0)))
 }
