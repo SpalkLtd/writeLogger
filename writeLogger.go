@@ -15,20 +15,20 @@ type WriteLogger struct {
 	out    io.Writer
 }
 
-func NewWriter(target io.Writer) WriteLogger {
+func NewWriter(target io.Writer) *WriteLogger {
 	wl := WriteLogger{
 		out:    target,
 		buffer: make([]byte, newSize, newSize),
 	}
-	return wl
+	return &wl
 }
 
-func NewWriterWithSize(target io.Writer, size uint) WriteLogger {
+func NewWriterWithSize(target io.Writer, size uint) *WriteLogger {
 	wl := WriteLogger{
 		out:    target,
 		buffer: make([]byte, size, size),
 	}
-	return wl
+	return &wl
 }
 
 func SetBufferSize(size uint) {
