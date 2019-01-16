@@ -4,71 +4,64 @@ import (
 	"bytes"
 	"io"
 	"strings"
+
+	"github.com/armon/circbuf"
 )
 
-const defaultSize uint = 10240
+const defaultSize int = 10240
 
-var newSize uint = defaultSize
+var newSize int = defaultSize
 
 type WriteLogger struct {
-	buffer []byte
+	buffer *circbuf.Buffer
 	out    io.Writer
+	size   int
 }
 
 func NewWriter(target io.Writer) *WriteLogger {
+	return NewWriterWithSize(target, newSize)
+}
+
+func NewWriterWithSize(target io.Writer, size int) *WriteLogger {
+	if size < 0 {
+		panic("Size must be >0")
+	}
+	b, _ := circbuf.NewBuffer(int64(size))
 	wl := WriteLogger{
 		out:    target,
-		buffer: make([]byte, newSize, newSize),
+		buffer: b,
+		size:   int(size),
 	}
 	return &wl
 }
 
-func NewWriterWithSize(target io.Writer, size uint) *WriteLogger {
-	wl := WriteLogger{
-		out:    target,
-		buffer: make([]byte, size, size),
-	}
-	return &wl
-}
-
-func SetBufferSize(size uint) {
+func SetBufferSize(size int) {
 	newSize = size
 }
 
 func (wl *WriteLogger) Write(p []byte) (n int, err error) {
 	outn, outerr := wl.out.Write(p)
-	bsize := len(wl.buffer)
-	isize := len(p)
-
-	// fmt.Printf("buffer length and cap: %v %v\n", len(wl.buffer), cap(wl.buffer))
-
-	// fmt.Println(bsize)
-	// fmt.Println(isize)
-	// fmt.Println(bsize - isize)
-
-	if isize > bsize {
-		wl.buffer = p[isize-bsize:]
-		// fmt.Printf("%v\n", string(wl.buffer))
-
-	} else {
-		//bsize >= isize
-		wl.buffer = append(wl.buffer[isize:], p...)
-
+	n, err = wl.buffer.Write(p)
+	if err != nil {
+		return n, err
 	}
 	return outn, outerr
 }
 
 func (wl WriteLogger) Read(n int) []byte {
-	if n > len(wl.buffer) {
-		return wl.buffer
+	b := wl.buffer.Bytes()
+	//Copy slice so we don't modify circbuf internals
+	buf := append(b[:0:0], b...)
+	if n > len(buf) {
+		return buf
 	}
-	return wl.buffer[len(wl.buffer)-n:]
+	return buf[len(buf)-n:]
 }
 
 func (wl WriteLogger) ReadBuffer() *bytes.Buffer {
-	return bytes.NewBuffer(wl.buffer)
+	return bytes.NewBuffer(wl.Read(wl.size))
 }
 
 func (wl WriteLogger) ReadString() string {
-	return strings.Trim(string(wl.buffer), string(rune(0)))
+	return strings.Trim(string(wl.Read(wl.size)), string(rune(0)))
 }

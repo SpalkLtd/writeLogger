@@ -70,6 +70,37 @@ func TestRepeatedWrite(t *testing.T) {
 	}
 }
 
+func TestLargeWrite(t *testing.T) {
+	// run the Fib function b.N times
+	outBuffer := bytes.NewBuffer(nil)
+	writer := NewWriterWithSize(outBuffer, 10485670)
+
+	for i := 0; i < 10000000; i++ {
+		writer.Write([]byte(toCopy))
+	}
+
+	outBuffer = writer.ReadBuffer()
+
+	outbytes, _ := ioutil.ReadAll(outBuffer)
+	if len(outbytes) != 10485670 {
+		t.Errorf("Outbytes not long enough")
+	}
+}
+
+func BenchmarkLargeWrite(b *testing.B) {
+	// run the Fib function b.N times
+	outBuffer := bytes.NewBuffer(nil)
+	writer := NewWriterWithSize(outBuffer, 10485670)
+
+	for i := 0; i < b.N; i++ {
+		writer.Write([]byte(toCopy))
+	}
+
+	outBuffer = writer.ReadBuffer()
+
+	// outbytes, _ := ioutil.ReadAll(outBuffer)
+}
+
 func TestWriteMoreThanBufferSize(t *testing.T) {
 	outBuffer := bytes.NewBuffer(nil)
 	writer := NewWriterWithSize(outBuffer, 10)
